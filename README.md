@@ -2,7 +2,8 @@
 
 sbt plugin to manage functions to AWS Lambda
 
-This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lambda). Thanks to their great work!
+This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lambda). Thanks to their great work!  
+The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project. 
 
 Installation
 ------------
@@ -19,12 +20,25 @@ Add the `AwsFnPlugin` auto-plugin to your build.sbt:
 enablePlugins(AwsFnPlugin)
 ```
 
+This plugin uses [DefaultAWSCredentialsProviderChain](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) 
+to retrieve the AWS credentials from your environment.  
+It will look for credentials in this order:  
+- Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+- Java System Properties - aws.accessKeyId and aws.secretKey
+- Credential profiles file at the default location (~/.aws/credentials)
+ ```
+ [default]
+aws_access_key_id = your_aws_access_key_id
+aws_secret_access_key = your_aws_secret_access_key
+ ```
+- Credentials delivered through the Amazon EC2 container service
+- Instance profile credentials delivered through the Amazon EC2 metadata service
 
 Usage
 -------------
-`sbt deployFunctions` deploy new AWS Lambda function(s) from the current project.
+`sbt deployFunctions` Deploy new AWS Lambda function(s) from the current project. The (fat) jar file will be put to your S3 bucket.
 
-`sbt undeployFunctions` undeploy existing AWS Lambda function(s) from the current project.
+`sbt undeployFunctions` Undeploy existing AWS Lambda function(s) from the current project. The (fat) jar file will be removed from your S3 bucket when all functions are undeployed successfully.
 
 
 Configuration
