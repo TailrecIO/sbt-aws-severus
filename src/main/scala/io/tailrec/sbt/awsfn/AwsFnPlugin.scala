@@ -14,7 +14,7 @@ object AwsFnPlugin extends AutoPlugin {
     val awsRegion = settingKey[Option[String]]("Name of the AWS region to connect to")
     val awsS3Bucket = settingKey[Option[String]]("S3 bucket name where the jar will be uploaded")
     val awsRoleArn = settingKey[Option[String]]("ARN of the IAM role for the Lambda function")
-    val awsLambdaHandlers = settingKey[Seq[(String, String)]]("A sequence of pairs of Lambda function names to handlers (for multiple handlers in one jar)")
+    val awsLambdaHandlers = settingKey[Seq[(String, String)]]("A sequence of pairs of Lambda function names to handlers")
     val awsLambdaTimeout = settingKey[Option[Int]]("The Lambda timeout length in seconds (1-300)")
     val awsLambdaMemorySize = settingKey[Option[Int]]("The amount of memory in MB for the Lambda function (128-1536, multiple of 64)")
 
