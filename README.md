@@ -31,6 +31,7 @@ It will look for credentials in this order:
 aws_access_key_id = your_aws_access_key_id
 aws_secret_access_key = your_aws_secret_access_key
  ```
+ 
 - Credentials delivered through the Amazon EC2 container service
 - Instance profile credentials delivered through the Amazon EC2 metadata service
 
@@ -46,14 +47,18 @@ Configuration
 
 sbt-aws-fn can be configured using sbt settings
 
-| sbt setting         |   Description |
-|:--------------------|:--------------|
-| awsS3Bucket         | The name of an S3 bucket where the lambda code will be stored |
-| awsRoleArn          | The [ARN](http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html "AWS ARN documentation") of an [IAM](https://aws.amazon.com/iam/ "AWS IAM documentation") role to use when creating a new Lambda |
-| awsRegion           | The name of the AWS region to connect to. Defaults to `us-east-1` |
-| awsLambdaTimeout    | The Lambda timeout in seconds (1-300). Defaults to AWS default. |
-| awsLambdaMemorySize | The amount of memory in MB for the Lambda function (128-1536, multiple of 64). Defaults to AWS default. |
-| awsLambdaHandlers   | Sequence of Lambda names to handler functions. |
+| sbt setting         | required?    | Description   |
+|:--------------------|:-------------|:--------------|
+| awsS3Bucket         | **required** | The name of an S3 bucket where the lambda code will be stored |
+| awsRoleArn          | optional     | The [ARN](http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html "AWS ARN documentation") of an [IAM](https://aws.amazon.com/iam/ "AWS IAM documentation") role to use when creating a new Lambda |
+| awsRegion           | optional     | The name of the AWS region to connect to. Defaults to `us-east-1` |
+| awsLambdaTimeout    | optional     | The Lambda timeout in seconds (1-300). Defaults to AWS default. |
+| awsLambdaMemorySize | optional     |The amount of memory in MB for the Lambda function (128-1536, multiple of 64). Defaults to AWS default. |
+| awsLambdaHandlers   | **required** |Sequence of Lambda names to handler functions. |
+
+When you omit `awsRoleArn` setting, the plugin will use the default one which is `lambda_basic_execution`.
+If it couldn't find the default one, it will create one for you. This process takes a couple seconds.
+Provide one if you want to save a little more time :)
 
 An example configuration might look like this:
 
@@ -77,7 +82,7 @@ awsLambdaTimeout := Some(30)
 awsRoleArn := Some("arn:aws:iam::123456789000:role/lambda_basic_execution")
 
 ```
-Note that you can omit `awsRoleArn` to use the default one which is `lambda_basic_execution`
+
 
 
 Publishing new versions of this plugin
