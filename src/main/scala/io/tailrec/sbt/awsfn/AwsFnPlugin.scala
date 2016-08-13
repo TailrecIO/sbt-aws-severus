@@ -60,6 +60,14 @@ object AwsFnPlugin extends AutoPlugin {
                                  roleArnOpt: Option[String],
                                  timeoutOpt: Option[Int],
                                  memorySizeOpt: Option[Int]): Seq[(String, Option[String])] = {
+    timeoutOpt.map { timeout =>
+      require(timeout >= 1 && timeout <= 300, "awsLambdaTimeout must be between 1 and 300")
+    }
+
+    memorySizeOpt.map {
+      memSize => require(memSize >= 128 && memSize <= 1536 && (memSize % 64 == 0),
+        "awsLambdaMemorySize must be between 128 and 1536, and it must be multiple of 64")
+    }
 
     val region = resolveRegion(regionOpt)
     val lambdaTask = new AwsLambdaService(region)
