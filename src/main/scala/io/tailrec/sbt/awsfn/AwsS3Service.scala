@@ -12,12 +12,14 @@ class AwsS3Service(region: Region) extends AwsService {
   client.setRegion(region)
 
   def putJar(bucketName: String, jar: File): Try[PutObjectResult] = Try {
+    println(s"Uploading jar: ${jar.getName} to S3 bucket: ${bucketName}")
     val request = new PutObjectRequest(bucketName, jar.getName, jar)
     request.setCannedAcl(CannedAccessControlList.AuthenticatedRead)
     client.putObject(request)
   }
 
   def deleteJar(bucketName: String, jarName: String): Try[Unit] = Try {
+    println(s"Deleting jar: ${jarName} from S3 bucket: ${bucketName}")
     val request = new DeleteObjectRequest(bucketName, jarName)
     client.deleteObject(request)
   }
