@@ -31,6 +31,7 @@ It will look for credentials in this order:
 aws_access_key_id = your_aws_access_key_id
 aws_secret_access_key = your_aws_secret_access_key
  ```
+ 
 - Credentials delivered through the Amazon EC2 container service
 - Instance profile credentials delivered through the Amazon EC2 metadata service
 
