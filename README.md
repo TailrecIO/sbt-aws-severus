@@ -1,6 +1,6 @@
 # sbt-aws-fn
 
-sbt plugin to manage functions to AWS Lambda
+sbt plugin to manage functions to [AWS Lambda](https://aws.amazon.com/lambda/)
 
 This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lambda). Thanks to their great work!  
 The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project.   
