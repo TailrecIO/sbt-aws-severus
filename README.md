@@ -6,7 +6,7 @@ This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lam
 The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project.   
 You can get started from a template by cloning this repository [sbt-aws-fn-template](https://github.com/TailrecIO/sbt-aws-fn-template)
 
-If you use activator, you can create a new project from an activator template like the following:  
+If you use activator, you can create a new project from the activator template like the following:  
 `activator new your-project-name aws-lambda-seed`
 
 Installation
@@ -72,9 +72,9 @@ retrieveManaged := true
 enablePlugins(AwsFnPlugin)
 
 awsLambdaHandlers := Seq(
-  "function1"                 -> "io.tailrec.example.Lambda::handleRequest1",
-  "function2"                 -> "io.tailrec.example.Lambda::handleRequest2",
-  "function3"                 -> "io.tailrec.example.Lambda::handleRequest3"
+  "function1"   -> "io.tailrec.example.Lambda::handleRequest1",
+  "function2"   -> "io.tailrec.example.Lambda::handleRequest2",
+  "function3"   -> "io.tailrec.example.Lambda::handleRequest3"
 )
 
 awsS3Bucket := Some("lambda-scala")
@@ -87,12 +87,10 @@ awsRoleArn := Some("arn:aws:iam::123456789000:role/lambda_basic_execution")
 
 ```
 
-
-
 Publishing new versions of this plugin
 --------------------------------------
 
-This plugin uses [sbt-sonatype](https://github.com/xerial/sbt-sonatype) to publish to TailrecIO's account on maven central
+This plugin uses [sbt-sonatype](https://github.com/xerial/sbt-sonatype) to publish to a maven central
 
 ```
 sbt publishSigned sonatypeRelease
