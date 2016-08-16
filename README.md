@@ -3,7 +3,11 @@
 sbt plugin to manage functions to AWS Lambda
 
 This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lambda). Thanks to their great work!  
-The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project. 
+The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project.   
+You can get started from a template by cloning this repository [sbt-aws-fn-template](https://github.com/TailrecIO/sbt-aws-fn-template)  
+
+If you use activator, you can create a new project from an activator template like the following:
+`activator new your-project-name aws-lambda-seed`
 
 Installation
 ------------
@@ -60,7 +64,7 @@ When you omit `awsRoleArn` setting, the plugin will use the default one which is
 If it couldn't find the default one, it will create one for you. This process takes a couple seconds.
 Provide one if you want to save a little more time :)
 
-An example configuration might look like this:
+Example configuration:
 
 ```scala
 retrieveManaged := true
@@ -73,7 +77,7 @@ awsLambdaHandlers := Seq(
   "function3"                 -> "io.tailrec.example.Lambda::handleRequest3"
 )
 
-awsS3Bucket := Some("lambda-jars")
+awsS3Bucket := Some("lambda-scala")
 
 awsLambdaMemorySize := Some(192)
 

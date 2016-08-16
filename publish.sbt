@@ -27,4 +27,11 @@ pomExtra := {
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <id>hussachai</id>
+      <name>Hussachai Puripunpinyo</name>
+      <url>http://tailrec.io</url>
+    </developer>
+  </developers>
 }
