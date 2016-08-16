@@ -4,9 +4,9 @@ sbt plugin to manage functions to AWS Lambda
 
 This plugin was inspired by [sbt-aws-lambda](https://github.com/gilt/sbt-aws-lambda). Thanks to their great work!  
 The fat jar is created by [sbt-assembly](https://github.com/sbt/sbt-assembly) which is a dependency of this project.   
-You can get started from a template by cloning this repository [sbt-aws-fn-template](https://github.com/TailrecIO/sbt-aws-fn-template)  
+You can get started from a template by cloning this repository [sbt-aws-fn-template](https://github.com/TailrecIO/sbt-aws-fn-template)
 
-If you use activator, you can create a new project from an activator template like the following:
+If you use activator, you can create a new project from an activator template like the following:  
 `activator new your-project-name aws-lambda-seed`
 
 Installation
