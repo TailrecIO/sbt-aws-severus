@@ -1,8 +1,15 @@
 package io.tailrec.sbt.awsfn
 
+import java.io.FileWriter
+import java.nio.file.{Files, Paths}
+
 import com.amazonaws.regions.{Region, RegionUtils, Regions}
+import io.tailrec.sbt.awsfn.ProGuardUtils.InputOutput
+import proguard.ProGuard
 import sbt._
+import sbt.Keys._
 import sbt.AutoPlugin
+import sbtassembly.AssemblyPlugin.autoImport._
 
 import scala.util.{Failure, Success}
 
@@ -21,41 +28,52 @@ object AwsFnPlugin extends AutoPlugin {
 
     val deployFunctions = taskKey[Seq[(String, Option[String])]]("Package and deploy the current project to AWS Lambda")
     val undeployFunctions = taskKey[Seq[(String, Boolean)]]("Undeploy the current project from AWS Lambda")
+    val printClasspath = taskKey[Unit]("Dump classpath")
   }
 
   /* sbt doesn't like AutoImport with capital A */
   val autoImport = AutoImport
   import autoImport._
-  import sbtassembly.AssemblyPlugin.autoImport._
 
   override def requires = sbtassembly.AssemblyPlugin
 
-  override lazy val projectSettings = {
-
-    Seq(
-      awsRegion := None,
-      awsS3Bucket := None,
-      awsRoleArn := None,
-      awsLambdaHandlers := Seq.empty[(String, String)],
-      awsLambdaTimeout := None,
-      awsLambdaMemorySize := None,
-      deployFunctions := deployFunctionsTask(
-        regionOpt = awsRegion.value,
-        s3BucketNameOpt = awsS3Bucket.value,
-        jarFile = sbtassembly.AssemblyKeys.assembly.value,
-        lambdaHandlers = awsLambdaHandlers.value,
-        roleArnOpt = awsRoleArn.value,
-        timeoutOpt = awsLambdaTimeout.value,
-        memorySizeOpt = awsLambdaMemorySize.value
-      ),
-      undeployFunctions := undeployFunctionsTask(
-        regionOpt = awsRegion.value,
-        s3BucketNameOpt = awsS3Bucket.value,
-        jarName = (assemblyJarName in assembly).value,
-        lambdaHandlers = awsLambdaHandlers.value
-      )
+  override lazy val projectSettings = Seq(
+    printClasspath := {
+      val jar = (assemblyOutputPath in assembly).value
+      val parent = jar.getParent
+      println(">>>>>>>>>>>>>>>>>" + jar)
+      println(">>>>>>>>>>>>>>>>>" + parent)
+//      ProGuardUtils.writeConfig(
+//        fileName = "@" + name.value + ".pro",
+//        fio = InputOutput(jar.getAbsoluteFile, "out"),
+//        callDefs = awsLambdaHandlers.value.map { handler =>
+//          handler._2.indexOf("#")
+//          CallDefinition(handler._1,
+//        }
+//      )
+    },
+    awsRegion := None,
+    awsS3Bucket := None,
+    awsRoleArn := None,
+    awsLambdaHandlers := Seq.empty[(String, String)],
+    awsLambdaTimeout := None,
+    awsLambdaMemorySize := None,
+    deployFunctions := deployFunctionsTask(
+      regionOpt = awsRegion.value,
+      s3BucketNameOpt = awsS3Bucket.value,
+      jarFile = sbtassembly.AssemblyKeys.assembly.value,
+      lambdaHandlers = awsLambdaHandlers.value,
+      roleArnOpt = awsRoleArn.value,
+      timeoutOpt = awsLambdaTimeout.value,
+      memorySizeOpt = awsLambdaMemorySize.value
+    ),
+    undeployFunctions := undeployFunctionsTask(
+      regionOpt = awsRegion.value,
+      s3BucketNameOpt = awsS3Bucket.value,
+      jarName = (assemblyJarName in assembly).value,
+      lambdaHandlers = awsLambdaHandlers.value
     )
-  }
+  )
 
   private def deployFunctionsTask(regionOpt: Option[String],
                                  s3BucketNameOpt: Option[String],
