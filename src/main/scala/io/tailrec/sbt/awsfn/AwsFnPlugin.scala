@@ -68,8 +68,8 @@ object AwsFnPlugin extends AutoPlugin {
       require(timeout >= 1 && timeout <= 300, "awsLambdaTimeout must be between 1 and 300")
     }
 
-    memorySizeOpt.map {
-      memSize => require(memSize >= 128 && memSize <= 1536 && (memSize % 64 == 0),
+    memorySizeOpt.map { memSize =>
+      require(memSize >= 128 && memSize <= 1536 && (memSize % 64 == 0),
         "awsLambdaMemorySize must be between 128 and 1536, and it must be multiple of 64")
     }
 
@@ -82,9 +82,9 @@ object AwsFnPlugin extends AutoPlugin {
       awsIam = new AwsIamService(region)
       roleArn <- resolveAwsRoleArn(roleArnOpt, awsIam)
     } yield {
-      val s3Key = jarFile.getName
       awsS3.putJar(s3BucketName, jarFile) match {
         case Success(_) =>
+          val s3Key = jarFile.getName
           for ((functionName, handlerName) <- lambdaHandlers) yield {
             lambdaTask.deployFunction(functionName, handlerName, roleArn,
               s3BucketName, s3Key, timeoutOpt, memorySizeOpt) match {
