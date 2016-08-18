@@ -44,12 +44,28 @@ class AwsLambdaService(region: Region) extends AwsService {
     createResult
   }
 
-  private def updateFunction(functionName: String, s3BucketName: String, s3Key: String): Try[UpdateFunctionCodeResult] = Try {
+  private def updateFunction(functionName: String, handlerName: String, roleArn: String,
+                             s3BucketName: String, s3Key: String,
+                             timeout: Option[Int], memorySize: Option[Int]): Try[UpdateFunctionCodeResult] = Try {
+
+    def updateFunctionConfiguration() = {
+      val request = new UpdateFunctionConfigurationRequest
+      request.setFunctionName(functionName)
+      request.setHandler(handlerName)
+      request.setRole(roleArn)
+      timeout.map(request.setTimeout(_))
+      memorySize.map(request.setMemorySize(_))
+      client.updateFunctionConfiguration(request)
+    }
+
+    updateFunctionConfiguration()
+
     val request = new UpdateFunctionCodeRequest()
     request.setFunctionName(functionName)
     request.setS3Bucket(s3BucketName)
     request.setS3Key(s3Key)
     val updateResult = client.updateFunctionCode(request)
+
     println(s"Updated lambda ${updateResult.getFunctionArn}")
     updateResult
   }
@@ -80,7 +96,7 @@ class AwsLambdaService(region: Region) extends AwsService {
       if(isNew) {
         createFunction(functionName, handlerName, roleArn, s3BucketName, s3Key, timeout, memorySize).map(Left(_))
       } else {
-        updateFunction(functionName, s3BucketName, s3Key).map(Right(_))
+        updateFunction(functionName, handlerName, roleArn, s3BucketName, s3Key, timeout, memorySize).map(Right(_))
       }
     }
   }

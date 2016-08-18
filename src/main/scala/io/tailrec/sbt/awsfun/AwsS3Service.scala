@@ -1,11 +1,11 @@
 package io.tailrec.sbt.awsfun
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
+
 import com.amazonaws.regions.Region
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
 import org.apache.commons.codec.digest.DigestUtils
-import sbt.File
 
 import scala.util.{Failure, Success, Try}
 
@@ -34,7 +34,7 @@ class AwsS3Service(region: Region) extends AwsService {
   }
 
   private def calculateChecksum[T](jar: File)(fn: String => T): Option[T] = {
-    val in = new FileInputStream(jar.getAbsoluteFile)
+    val in = new FileInputStream(jar)
     val result = Try(DigestUtils.md5Hex(in)) match {
       case Success(checksum) =>
         Some(fn(checksum))

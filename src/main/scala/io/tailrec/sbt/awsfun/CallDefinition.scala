@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 object CallDefinition extends App {
 
@@ -20,10 +20,15 @@ object CallDefinition extends App {
   println(apply("test", "io.tailrec.example.Lambda::handler1"))
   println(apply("test", "io.tailrec.example.Lambda::handler2#scala.Unit"))
   println(apply("test", "io.tailrec.example.Lambda::handler3#void"))
-  println(apply("test", "io.tailrec.example.Lambda::handler4#java.lang.String"))
+  println(apply("test", "io.tailrec.example.Lambda::handler4#java.lang.String").handler.toAWSLambdaHandler)
 }
 
-case class Handler(className: String, methodName: String, returnType: String)
+case class Handler(className: String, methodName: String, returnType: String) {
+  /**
+    * The handler string in AWS Lambda format
+    */
+  lazy val toAWSLambdaHandler: String = className + "::" + methodName
+}
 
 case class CallDefinition(functionName: String, handler: Handler)
 

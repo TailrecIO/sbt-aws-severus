@@ -1,12 +1,10 @@
 package io.tailrec.sbt.awsfun
 
-import java.io.FileWriter
-import java.nio.file.{Files, Paths}
+import java.io.File
 
 import com.amazonaws.regions.{Region, RegionUtils, Regions}
-import io.tailrec.sbt.awsfn.ProGuardUtils.InputOutput
-import proguard.ProGuard
-import sbt._
+import ProGuardUtils.SourceJar
+import sbt.{File => _, _}
 import sbt.Keys._
 import sbt.AutoPlugin
 import sbtassembly.AssemblyPlugin.autoImport._
@@ -26,9 +24,11 @@ object AwsFunPlugin extends AutoPlugin {
     val awsLambdaTimeout = settingKey[Option[Int]]("The Lambda timeout length in seconds (1-300)")
     val awsLambdaMemorySize = settingKey[Option[Int]]("The amount of memory in MB for the Lambda function (128-1536, multiple of 64)")
 
+    val proGuardEnabled = settingKey[Boolean]("Enable ProGuard to shrink the output jar file")
+    val proGuardConfig = settingKey[Seq[String]]("ProGuard configuration. The default configuartion is overridden by these values")
+
     val deployFunctions = taskKey[Seq[(String, Option[String])]]("Package and deploy the current project to AWS Lambda")
     val undeployFunctions = taskKey[Seq[(String, Boolean)]]("Undeploy the current project from AWS Lambda")
-    val printClasspath = taskKey[Unit]("Dump classpath")
   }
 
   /* sbt doesn't like AutoImport with capital A */
@@ -38,74 +38,94 @@ object AwsFunPlugin extends AutoPlugin {
   override def requires = sbtassembly.AssemblyPlugin
 
   override lazy val projectSettings = Seq(
-    printClasspath := {
-      val jar = (assemblyOutputPath in assembly).value
-      val parent = jar.getParent
-      println(">>>>>>>>>>>>>>>>>" + jar)
-      println(">>>>>>>>>>>>>>>>>" + parent)
-//      ProGuardUtils.writeConfig(
-//        fileName = "@" + name.value + ".pro",
-//        fio = InputOutput(jar.getAbsoluteFile, "out"),
-//        callDefs = awsLambdaHandlers.value.map { handler =>
-//          handler._2.indexOf("#")
-//          CallDefinition(handler._1,
-//        }
-//      )
-    },
     awsRegion := None,
     awsS3Bucket := None,
     awsRoleArn := None,
     awsLambdaHandlers := Seq.empty[(String, String)],
     awsLambdaTimeout := None,
     awsLambdaMemorySize := None,
+    proGuardEnabled := false,
+    proGuardConfig := Nil,
     deployFunctions := deployFunctionsTask(
-      regionOpt = awsRegion.value,
-      s3BucketNameOpt = awsS3Bucket.value,
-      jarFile = sbtassembly.AssemblyKeys.assembly.value,
-      lambdaHandlers = awsLambdaHandlers.value,
-      roleArnOpt = awsRoleArn.value,
-      timeoutOpt = awsLambdaTimeout.value,
-      memorySizeOpt = awsLambdaMemorySize.value
+      DeploymentConfig(
+        region = awsRegion.value,
+        s3BucketName = awsS3Bucket.value,
+        jarFile = sbtassembly.AssemblyKeys.assembly.value.getAbsoluteFile,
+        lambdaHandlers = awsLambdaHandlers.value,
+        roleArn = awsRoleArn.value,
+        timeout = awsLambdaTimeout.value,
+        memorySize = awsLambdaMemorySize.value
+      ),
+      ProGuardConfig(
+        name = name.value,
+        enabled = proGuardEnabled.value,
+        config = proGuardConfig.value
+      )
     ),
     undeployFunctions := undeployFunctionsTask(
-      regionOpt = awsRegion.value,
-      s3BucketNameOpt = awsS3Bucket.value,
-      jarName = (assemblyJarName in assembly).value,
-      lambdaHandlers = awsLambdaHandlers.value
+      UndeploymentConfig(
+        region = awsRegion.value,
+        s3BucketName = awsS3Bucket.value,
+        jarName = (assemblyJarName in assembly).value,
+        lambdaHandlers = awsLambdaHandlers.value
+      )
     )
   )
 
-  private def deployFunctionsTask(regionOpt: Option[String],
-                                 s3BucketNameOpt: Option[String],
-                                 jarFile: File,
-                                 lambdaHandlers: Seq[(String, String)],
-                                 roleArnOpt: Option[String],
-                                 timeoutOpt: Option[Int],
-                                 memorySizeOpt: Option[Int]): Seq[(String, Option[String])] = {
-    timeoutOpt.map { timeout =>
+  case class DeploymentConfig(region: Option[String],
+                              s3BucketName: Option[String],
+                              jarFile: File,
+                              lambdaHandlers: Seq[(String, String)],
+                              roleArn: Option[String],
+                              timeout: Option[Int],
+                              memorySize: Option[Int]) {
+    val callDefinitions = lambdaHandlers.map{ case (functionName, handler) =>
+      CallDefinition(functionName, handler)
+    }
+  }
+
+  case class ProGuardConfig(name: String, enabled: Boolean, config: Seq[String])
+
+  case class UndeploymentConfig(region: Option[String],
+                                s3BucketName: Option[String],
+                                jarName: String,
+                                lambdaHandlers: Seq[(String, String)])
+
+  private def deployFunctionsTask(deployment: DeploymentConfig,
+                                  proGuard: ProGuardConfig): Seq[(String, Option[String])] = {
+    deployment.timeout.map { timeout =>
       require(timeout >= 1 && timeout <= 300, "awsLambdaTimeout must be between 1 and 300")
     }
 
-    memorySizeOpt.map { memSize =>
+    deployment.memorySize.map { memSize =>
       require(memSize >= 128 && memSize <= 1536 && (memSize % 64 == 0),
         "awsLambdaMemorySize must be between 128 and 1536, and it must be multiple of 64")
     }
 
-    val region = resolveRegion(regionOpt)
+    val region = resolveRegion(deployment.region)
     val lambdaTask = new AwsLambdaService(region)
     val awsS3 = new AwsS3Service(region)
 
     val result = for {
-      s3BucketName <- resolveAwsS3BucketName(s3BucketNameOpt, awsS3)
+      s3BucketName <- resolveAwsS3BucketName(deployment.s3BucketName, awsS3)
       awsIam = new AwsIamService(region)
-      roleArn <- resolveAwsRoleArn(roleArnOpt, awsIam)
+      roleArn <- resolveAwsRoleArn(deployment.roleArn, awsIam)
     } yield {
+      val jarFile = if(proGuard.enabled) {
+        /* This function can throw an exception to terminate the task */
+        runProGuard(proGuard.name, deployment.jarFile, deployment.callDefinitions, proGuard.config)
+      } else {
+        deployment.jarFile
+      }
       awsS3.putJar(s3BucketName, jarFile) match {
         case Success(_) =>
-          val s3Key = jarFile.getName
-          for ((functionName, handlerName) <- lambdaHandlers) yield {
+          val s3Key = deployment.jarFile.getName
+          for (call <- deployment.callDefinitions) yield {
+            val functionName = call.functionName
+            val handlerName = call.handler.toAWSLambdaHandler
+
             lambdaTask.deployFunction(functionName, handlerName, roleArn,
-              s3BucketName, s3Key, timeoutOpt, memorySizeOpt) match {
+              s3BucketName, s3Key, deployment.timeout, deployment.memorySize) match {
               case Success(Left(createFunctionCodeResult)) =>
                 functionName -> Some(createFunctionCodeResult.getFunctionArn)
               case Success(Right(updateFunctionCodeResult)) =>
@@ -118,20 +138,48 @@ object AwsFunPlugin extends AutoPlugin {
         case Failure(e) => sys.error(s"Could not put jar to S3 because of ${e.getMessage}")
       }
     }
+
     result.getOrElse(Nil)
   }
 
-  private def undeployFunctionsTask(regionOpt: Option[String],
-                                   s3BucketNameOpt: Option[String],
-                                   jarName: String,
-                                   lambdaHandlers: Seq[(String, String)]): Seq[(String, Boolean)] = {
+  /**
+    * Run ProGuard on the input jar using provided configurations.
+    * This function throws an exception when ProGuard fails, and the task must be terminated.
+    *
+    * @param name
+    * @param jarFile
+    * @param callDefs
+    * @param proGuardConfig
+    * @return the minified jar file
+    */
+  private def runProGuard(name: String,
+                          jarFile: File,
+                          callDefs: Seq[CallDefinition],
+                          proGuardConfig: Seq[String]): File = {
+    println("Running ProGuard...")
+    val fileName = s"${name}.pro"
+    ProGuardUtils.writeConfig(fileName, SourceJar(jarFile), callDefs, proGuardConfig) match {
+      case Success(outFile) =>
+        ProGuardUtils.run(fileName) match {
+          case Success(_) =>
+            println(s"The file was processed by ProGuard successfully and saved to ${outFile}")
+            outFile
+          case Failure(e) =>
+            sys.error(s"ProGuard error: ${e.getMessage}")
+        }
+      case Failure(e) =>
+        sys.error(s"Failed to create the ProGuard config due to ${e}")
+    }
+  }
 
-    val region = resolveRegion(regionOpt)
+  private def undeployFunctionsTask(undeployment: UndeploymentConfig): Seq[(String, Boolean)] = {
+
+    val region = resolveRegion(undeployment.region)
     val lambdaTask = new AwsLambdaService(region)
     val awsS3 = new AwsS3Service(region)
 
-    resolveAwsS3BucketName(s3BucketNameOpt, awsS3) map { s3BucketName =>
-      val result = for ((functionName, handlerName) <- lambdaHandlers) yield {
+    resolveAwsS3BucketName(undeployment.s3BucketName, awsS3) map { s3BucketName =>
+      val result = for ((functionName, handlerName) <- undeployment.lambdaHandlers) yield {
         lambdaTask.undeployFunction(functionName) match {
           case Success(_) => functionName -> true
           case Failure(e) =>
@@ -141,7 +189,7 @@ object AwsFunPlugin extends AutoPlugin {
       }
       val (successes, errors) = result.partition(_._2 == true)
       if(result.isEmpty || errors.size == 0){
-        awsS3.deleteJar(s3BucketName, jarName) match {
+        awsS3.deleteJar(s3BucketName, undeployment.jarName) match {
           case Success(_) => println(s"Undeployed successfully!")
           case Failure(e) => println(s"All functions were undeployed but the jar file was not deleted due to ${e.getMessage}")
         }
