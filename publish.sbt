@@ -16,10 +16,10 @@ pomIncludeRepository := { _ => false }
 sonatypeProfileName := "io.tailrec"
 
 pomExtra := {
-  <url>https://github.com/TailrecIO/sbt-aws-fn</url>
+  <url>https://github.com/TailrecIO/sbt-aws-fun</url>
   <scm>
-    <url>git@github.com:TailrecIO/sbt-aws-fn.git</url>
-    <connection>scm:git:git@github.com:TailrecIO/sbt-aws-fn.git</connection>
+    <url>git@github.com:TailrecIO/sbt-aws-fun.git</url>
+    <connection>scm:git:git@github.com:TailrecIO/sbt-aws-fun.git</connection>
   </scm>
   <licenses>
     <license>

@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import com.amazonaws.regions.Region
 import com.amazonaws.services.lambda.{AWSLambdaClient}
@@ -7,7 +7,7 @@ import scala.util.{Success, Try}
 
 class AwsLambdaService(region: Region) extends AwsService {
 
-  val client: AWSLambdaClient = new AWSLambdaClient(credentialsProvider)
+  private val client: AWSLambdaClient = new AWSLambdaClient(credentialsProvider)
   client.setRegion(region)
 
   private def isNewFunction(functionName: String, qualifier: Option[String] = None): Try[Boolean] = {

@@ -1,8 +1,8 @@
-name := "sbt-aws-fn"
+name := "sbt-aws-fun"
 
 organization := "io.tailrec.sbt"
 
-version := "0.5.0"
+version := "0.6.0"
 
 sbtPlugin := true
 

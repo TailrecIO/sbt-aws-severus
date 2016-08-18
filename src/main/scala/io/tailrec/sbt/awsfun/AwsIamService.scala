@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import com.amazonaws.regions.Region
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient
@@ -10,7 +10,7 @@ class AwsIamService(region: Region) extends AwsService {
 
   val defaultLambdaRole = "lambda_basic_execution"
 
-  val client = new AmazonIdentityManagementClient(credentialsProvider)
+  private val client = new AmazonIdentityManagementClient(credentialsProvider)
   client.setRegion(region)
 
   def basicLambdaRole(): Option[Role] = {
@@ -20,6 +20,7 @@ class AwsIamService(region: Region) extends AwsService {
   }
 
   def createBasicLambdaRole(): Try[Role] = Try {
+    println(s"Creating a new IAM role:  ${defaultLambdaRole}")
     val policyDocument = """{"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}"""
     val request = new CreateRoleRequest
     request.setRoleName(defaultLambdaRole)
