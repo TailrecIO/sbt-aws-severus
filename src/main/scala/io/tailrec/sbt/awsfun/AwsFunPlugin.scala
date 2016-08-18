@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import com.amazonaws.regions.{Region, RegionUtils, Regions}
 import sbt._
@@ -6,9 +6,9 @@ import sbt.AutoPlugin
 
 import scala.util.{Failure, Success}
 
-object AwsFnPlugin extends AutoPlugin {
+object AwsFunPlugin extends AutoPlugin {
 
-  val PluginName = "sbt-aws-fn"
+  val PluginName = "sbt-aws-fun"
 
   object AutoImport {
 

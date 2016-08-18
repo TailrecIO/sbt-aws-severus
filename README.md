@@ -1,4 +1,4 @@
-# sbt-aws-fn
+# sbt-aws-fun
 
 sbt plugin to manage functions to [AWS Lambda](https://aws.amazon.com/lambda/)
 
@@ -15,13 +15,13 @@ Installation
 Add the following to your `project/plugins.sbt` file:
 
 ```scala
-addSbtPlugin("io.tailrec.sbt" % "sbt-aws-fn" % "0.5.0")
+addSbtPlugin("io.tailrec.sbt" % "sbt-aws-fun" % "0.6.0")
 ```
 
-Add the `AwsFnPlugin` auto-plugin to your build.sbt:
+Add the `AwsFunPlugin` auto-plugin to your build.sbt:
 
 ```scala
-enablePlugins(AwsFnPlugin)
+enablePlugins(AwsFunPlugin)
 ```
 
 This plugin uses [DefaultAWSCredentialsProviderChain](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) 
@@ -49,7 +49,7 @@ Usage
 Configuration
 -------------
 
-sbt-aws-fn can be configured using sbt settings
+sbt-aws-fun can be configured using sbt settings
 
 | sbt setting         | required?    | Description   |
 |:--------------------|:-------------|:--------------|
@@ -69,7 +69,7 @@ Example configuration:
 ```scala
 retrieveManaged := true
 
-enablePlugins(AwsFnPlugin)
+enablePlugins(AwsFunPlugin)
 
 awsLambdaHandlers := Seq(
   "function1"   -> "io.tailrec.example.Lambda::handleRequest1",

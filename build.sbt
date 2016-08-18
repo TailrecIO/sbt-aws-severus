@@ -1,4 +1,4 @@
-name := "sbt-aws-fn"
+name := "sbt-aws-fun"
 
 organization := "io.tailrec.sbt"
 

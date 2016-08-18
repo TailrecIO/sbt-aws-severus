@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import com.amazonaws.regions.Region
 import com.amazonaws.services.lambda.{AWSLambdaClient}
