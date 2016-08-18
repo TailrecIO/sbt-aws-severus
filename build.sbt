@@ -2,7 +2,7 @@ name := "sbt-aws-fun"
 
 organization := "io.tailrec.sbt"
 
-version := "0.6.0-SNAPSHOT"
+version := "0.6.0"
 
 sbtPlugin := true
 
