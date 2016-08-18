@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import java.io.FileWriter
 import java.nio.file.{Files, Paths}
@@ -13,9 +13,9 @@ import sbtassembly.AssemblyPlugin.autoImport._
 
 import scala.util.{Failure, Success}
 
-object AwsFnPlugin extends AutoPlugin {
+object AwsFunPlugin extends AutoPlugin {
 
-  val PluginName = "sbt-aws-fn"
+  val PluginName = "sbt-aws-fun"
 
   object AutoImport {
 

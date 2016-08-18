@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfn
+package io.tailrec.sbt.awsfun
 
 import java.io.FileInputStream
 import com.amazonaws.regions.Region
