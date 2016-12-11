@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 import java.io.{File, FileInputStream}
 
@@ -9,7 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import scala.util.{Failure, Success, Try}
 
-class AwsS3Service(region: Region) extends AwsService {
+class SeverusAwsS3(region: Region) extends SeverusAws {
 
   private val client = new AmazonS3Client(credentialsProvider)
   client.setRegion(region)

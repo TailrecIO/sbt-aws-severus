@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 import com.amazonaws.regions.Region
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient
@@ -6,7 +6,7 @@ import com.amazonaws.services.identitymanagement.model.{CreateRoleRequest, Creat
 
 import scala.util.Try
 
-class AwsIamService(region: Region) extends AwsService {
+class SeverusAwsIam(region: Region) extends SeverusAws {
 
   val defaultLambdaRole = "lambda_basic_execution"
 

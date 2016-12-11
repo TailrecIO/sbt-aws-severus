@@ -1,8 +1,8 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 import com.amazonaws.auth.{AWSCredentialsProvider, DefaultAWSCredentialsProviderChain}
 
-trait AwsService {
+trait SeverusAws {
 
   lazy val credentialsProvider: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain()
 

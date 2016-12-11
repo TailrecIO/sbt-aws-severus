@@ -1,11 +1,11 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 import com.amazonaws.regions.Region
 import com.amazonaws.services.lambda.{AWSLambdaClient}
 import com.amazonaws.services.lambda.model._
 import scala.util.{Success, Try}
 
-class AwsLambdaService(region: Region) extends AwsService {
+class SeverusAwsLambda(region: Region) extends SeverusAws {
 
   private val client: AWSLambdaClient = new AWSLambdaClient(credentialsProvider)
   client.setRegion(region)

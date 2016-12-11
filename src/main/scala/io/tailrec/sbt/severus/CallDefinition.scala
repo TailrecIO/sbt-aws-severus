@@ -1,4 +1,4 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 object CallDefinition extends App {
 

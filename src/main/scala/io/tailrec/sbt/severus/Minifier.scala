@@ -1,12 +1,13 @@
-package io.tailrec.sbt.awsfun
+package io.tailrec.sbt.severus
 
 import java.io.{BufferedWriter, File, FileWriter}
 
+import io.tailrec.sbt.severus.SeverusModels.FunctionHandlerModel
 import proguard.{Configuration, ConfigurationParser, ProGuard}
 
 import scala.util.Try
 
-object ProGuardUtils {
+object Minifier {
 
   private val defaultConfig = Seq(
     "-dontobfuscate",
@@ -25,7 +26,7 @@ object ProGuardUtils {
 
   def writeConfig(fileName: String,
                   srcJar: SourceJar,
-                  callDefs: Seq[CallDefinition],
+                  handlers: Seq[FunctionHandlerModel],
                   userConfig: Seq[String] = Nil): Try[File] = {
 
     var writer: BufferedWriter = null
@@ -46,11 +47,10 @@ object ProGuardUtils {
         writer.newLine
       }
       writer.newLine
-      callDefs.groupBy(_.handler.className).foreach { case (className, calls) =>
+      handlers.groupBy(_.className).foreach { case (className, calls) =>
         writer.append("-keep class ").append(className).append(" {")
         writer.newLine
-        calls.foreach { case c =>
-          val handler = c.handler
+        calls.foreach { case handler =>
           writer.append("  public ").append(handler.returnType)
             .append(" ").append(handler.methodName).append("(...);")
           writer.newLine
@@ -66,7 +66,7 @@ object ProGuardUtils {
     result
   }
 
-  def run(fileName: String): Try[Unit] = Try {
+  def minify(fileName: String): Try[Unit] = Try {
     val proConfig = new Configuration()
     val parser = new ConfigurationParser(Array("@"+fileName), System.getProperties())
     Try(parser.parse(proConfig))
