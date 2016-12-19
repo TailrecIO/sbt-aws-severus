@@ -21,3 +21,4 @@ libraryDependencies ++= Seq(
 )
 
 javaVersionPrefix in javaVersionCheck := Some("1.8")
+

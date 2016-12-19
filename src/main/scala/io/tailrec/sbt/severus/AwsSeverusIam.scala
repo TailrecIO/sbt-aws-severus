@@ -1,23 +1,25 @@
 package io.tailrec.sbt.severus
 
-import com.amazonaws.regions.Region
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient
-import com.amazonaws.services.identitymanagement.model.{CreateRoleRequest, CreateRoleResult, Role}
+import com.amazonaws.services.identitymanagement.model.{CreateRoleRequest, Role}
+import io.tailrec.sbt.severus.config.IamConfig
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
-class SeverusAwsIam(region: Region) extends SeverusAws {
+class AwsSeverusIam(config: IamConfig) extends AwsSeverus {
 
   val defaultLambdaRole = "lambda_basic_execution"
 
   private val client = new AmazonIdentityManagementClient(credentialsProvider)
-  client.setRegion(region)
+  client.setRegion(config.region)
 
-  def basicLambdaRole(): Option[Role] = {
-    import scala.collection.JavaConverters._
+  def findRole(name: String): Option[Role] = {
     val existingRoles = client.listRoles().getRoles.asScala
-    existingRoles.find(_.getRoleName == defaultLambdaRole)
+    existingRoles.find(_.getRoleName == name)
   }
+
+  def basicLambdaRole(): Option[Role] = findRole(defaultLambdaRole)
 
   def createBasicLambdaRole(): Try[Role] = Try {
     println(s"Creating a new IAM role:  ${defaultLambdaRole}")
@@ -27,5 +29,7 @@ class SeverusAwsIam(region: Region) extends SeverusAws {
     request.setAssumeRolePolicyDocument(policyDocument)
     client.createRole(request).getRole
   }
+
+  def shutdown(): Unit = client.shutdown()
 
 }

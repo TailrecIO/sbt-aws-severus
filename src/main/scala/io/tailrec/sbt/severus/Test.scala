@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 /**
   * Created by Hussachai on 8/21/2016.
   */
-object Test extends App with SeverusAws {
+object Test extends App with AwsSeverus {
   val PACKAGE_VARIABLE = "<PACKAGE>"
   val INPUT_TEMPLATE = "{\n" +
     "  \"package\": \"" + PACKAGE_VARIABLE + "\",\n" +
@@ -19,8 +19,8 @@ object Test extends App with SeverusAws {
     "  \"requestbody\": \"$util.escapeJavaScript($input.json('$'))\",\n" +
     "      #foreach($elem in $input.params().keySet())\n" +
     "        \"$elem\": {\n" +
-    "            #foreach($innerElem in $input.params().get($elem).keySet())\n" +
-    "        \"$innerElem\": \"$util.urlDecode($input.params().get($elem).get($innerElem))\"#if($foreach.hasNext),#end\n" +
+    "            #foreach($innerElem in $input.params().getAs($elem).keySet())\n" +
+    "        \"$innerElem\": \"$util.urlDecode($input.params().getAs($elem).getAs($innerElem))\"#if($foreach.hasNext),#end\n" +
     "      #end\n" +
     "        }#if($foreach.hasNext),#end\n" +
     "      #end\n" +
@@ -50,4 +50,5 @@ object Test extends App with SeverusAws {
 //    .withStageKeys(List(new StageKey().withRestApiId("k6xiqf7156").withStageName("prod")).asJava)
 //  println(apiGatewayClient.createApiKey(apiKeyReq).getId)
 
+  def shutdown(): Unit = {}
 }
